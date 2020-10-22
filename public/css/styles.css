@@ -2,6 +2,19 @@
   padding-top: 70px;
   padding-bottom: 70px;
 }
+
+.navbar-default {
+  background: #364f6b;
+}
+
+.navbar-default .navbar-brand {
+  color: white;
+}
+
+.navbar-default .navbar-brand:hover {
+  color: white !important;
+}
+
 .navbar {
   padding-top: 15px;
   padding-bottom: 15px;
@@ -11,6 +24,11 @@
   font-size: 12px;
   letter-spacing: 5px;
 }
+
+.navbar-default .navbar-nav > li > a {
+  color: white;
+}
+
 .navbar-nav li a:hover {
   color: #1abc9c !important;
 }
@@ -25,7 +43,7 @@
   bottom: 0;
   width: 100%;
   height: 60px;
-  background-color: #1abc9c;
+  background-color: #364f6b;
 }
 
 .footer p {
