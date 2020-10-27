@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const ejs = require('ejs');
 // Load the full build.
 const _ = require('lodash');
@@ -12,8 +13,6 @@ const contactContent =
   'Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.';
 
 const app = express();
-
-const posts = [];
 
 const truncateString = (str, num) => {
   if (str.length <= num) {
@@ -31,11 +30,33 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Static folder
 app.use(express.static('public'));
 
+// URL & Options
+const DB = 'blogDB';
+const url = `mongodb://localhost:27017/${DB}`;
+const options = {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+};
+
+// Create database
+mongoose.connect(url, options);
+
+// Schema
+const postSchema = {
+  title: String,
+  content: String,
+};
+
+// Mongoose model, collections
+const Post = mongoose.model('Post', postSchema);
+
 app.get('/', (req, res) => {
-  res.render('home', {
-    startingContent: homeStartingContent,
-    posts: posts,
-    truncate: truncateString,
+  Post.find({}, (err, posts) => {
+    res.render('home', {
+      startingContent: homeStartingContent,
+      posts: posts,
+      truncate: truncateString,
+    });
   });
 });
 
@@ -58,30 +79,29 @@ app.get('/compose', (req, res) => {
 app.post('/compose', (req, res) => {
   const { postTitle, postBody } = req.body;
 
-  const post = {
+  const post = new Post({
     title: postTitle,
     content: postBody,
-  };
+  });
 
-  posts.push(post);
-  res.redirect('/');
+  post.save((err) => {
+    if (!err) {
+      res.redirect('/');
+    }
+  });
 });
 
 // Route parameters
-app.get('/posts/:postName', (req, res) => {
-  const requestedTitle = _.lowerCase(req.params.postName);
+app.get('/posts/:postId', (req, res) => {
+  const requestedPostId = _.lowerCase(req.params.postId);
 
-  posts.forEach((post) => {
-    storedTitle = _.lowerCase(post.title);
+  storedTitle = _.lowerCase(post.title);
 
-    if (storedTitle === requestedTitle) {
-      res.render('post', {
-        title: post.title,
-        content: post.content,
-      });
-    } else {
-      console.log('Not Matched');
-    }
+  Post.findOne({ _id: requestedPostId }, (req, res) => {
+    res.render('post', {
+      title: post.title,
+      content: post.content,
+    });
   });
 });
 
